@@ -2,6 +2,8 @@ package dev.persona.domain.models;
 
 import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,7 +15,7 @@ import lombok.Setter;
 /**Persona Entity. */
 @Entity
 @Getter@Setter
-public class PersonaEntity {
+public class PersonaEntity extends PanacheEntityBase{
     /** Primary key. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
