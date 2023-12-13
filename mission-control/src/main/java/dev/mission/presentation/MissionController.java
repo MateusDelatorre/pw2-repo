@@ -20,6 +20,7 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 import dev.mission.application.mission.CreateMissionUseCase;
 import dev.mission.application.mission.DeleteMissionUseCase;
 import dev.mission.application.mission.GetMissionUseCase;
+import dev.mission.application.mission.ListMissionsUseCase;
 import dev.mission.application.mission.UpdateMissionUseCase;
 import dev.mission.domain.dto.mission.request.CreateMissionRequest;
 import dev.mission.domain.dto.mission.request.UpdateMissionRequest;
@@ -35,6 +36,7 @@ public class MissionController {
     private final GetMissionUseCase getMissionUseCase;
     private final UpdateMissionUseCase updateMissionUseCase;
     private final DeleteMissionUseCase deleteMissionUseCase;
+    private final ListMissionsUseCase listMissionsUseCase;
 
     @Inject
     JsonWebToken jwt;
@@ -42,11 +44,12 @@ public class MissionController {
     @Inject
     public MissionController(CreateMissionUseCase createMissionUseCase, 
     GetMissionUseCase getMissionUseCase, UpdateMissionUseCase updateMissionUseCase,
-    DeleteMissionUseCase deleteMissionUseCase) {
+    DeleteMissionUseCase deleteMissionUseCase, ListMissionsUseCase listMissionsUseCase) {
         this.createMissionUseCase = createMissionUseCase;
         this.getMissionUseCase = getMissionUseCase;
         this.updateMissionUseCase = updateMissionUseCase;
         this.deleteMissionUseCase = deleteMissionUseCase;
+        this.listMissionsUseCase = listMissionsUseCase;
     }
     
     @GET
@@ -126,6 +129,29 @@ public class MissionController {
             String userHash = jwt.getClaim("c_hash");
             return deleteMissionUseCase.execute(hash, userHash)
                     .map(response -> Response.status(Status.OK).entity(response).build())
+                    .log()
+                    .onFailure().transform(e -> {
+                        String message = e.getMessage();
+                        throw new ServiceException(
+                                message,
+                                Response.Status.BAD_REQUEST);
+                    });
+        } catch (Exception e) {
+            String message = e.getMessage();
+            throw new ServiceException(
+                    message,
+                    Response.Status.BAD_REQUEST);
+        }
+    }
+
+    @GET
+    @Path("/user/list")
+    @WithSession
+    public Uni<Response> listUserWorkouts() {
+        try {
+            String userHash = jwt.getClaim("c_hash");
+            return listMissionsUseCase.execute(userHash)
+                    .map(response -> Response.status(Status.ACCEPTED).entity(response).build())
                     .log()
                     .onFailure().transform(e -> {
                         String message = e.getMessage();

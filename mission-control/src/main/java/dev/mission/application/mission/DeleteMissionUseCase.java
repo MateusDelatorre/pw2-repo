@@ -6,20 +6,20 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class DeleteMissionUseCase {
-    private final MissionRepository personaRepository;
+    private final MissionRepository missionRepository;
 
-    public DeleteMissionUseCase(MissionRepository personaRepository){
-        this.personaRepository = personaRepository;
+    public DeleteMissionUseCase(MissionRepository missionRepository){
+        this.missionRepository = missionRepository;
     }
 
-    public Uni<Void> execute(final String hash, final String userHash) {
-        return personaRepository.findByHash(hash)
+    public Uni<Object> execute(final String hash, final String userHash) {
+        return missionRepository.findByHash(hash)
         .onItem().ifNotNull()
-        .transformToUni(persona -> {
-            if (!userHash.equals(persona.getUserHash())) {
+        .transformToUni(mission -> {
+            if (!userHash.equals(mission.getUserHash())) {
                 throw new IllegalArgumentException("Proibido");
             }
-            return persona.delete();
+            return missionRepository.deleteMission(mission);
         });
     }
 }

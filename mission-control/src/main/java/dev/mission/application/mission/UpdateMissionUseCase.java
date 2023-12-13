@@ -21,6 +21,9 @@ public class UpdateMissionUseCase {
                 throw new IllegalArgumentException("Proibido");
             }
             mission.setNome(request.getNome());
+            mission.setCompleted(request.getCompleted());
+            mission.setDescription(request.getDescription());
+            mission.setDifficulty(request.getDifficulty());
             return missionRepository.persist(mission)
             .map(v ->{
                 UpdateMissionResponse response = new UpdateMissionResponse();

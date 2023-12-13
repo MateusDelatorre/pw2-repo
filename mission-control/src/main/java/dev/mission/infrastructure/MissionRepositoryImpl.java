@@ -1,5 +1,7 @@
 package dev.mission.infrastructure;
 
+import java.util.List;
+
 import dev.mission.data.repository.MissionRepository;
 import dev.mission.domain.models.MissionEntity;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
@@ -19,4 +21,13 @@ public class MissionRepositoryImpl implements MissionRepository, PanacheReposito
         return find("hash", hash).firstResult();
     }
     
+    @Override
+    public Uni<List<MissionEntity>> listUserMissions(String hash) {
+        return find("userHash", hash).list();
+    }
+
+    @Override
+    public Uni<Long> deleteMission(MissionEntity mission) {
+        return delete("hash", mission.getHash());
+    }
 }

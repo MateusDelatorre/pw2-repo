@@ -3,6 +3,7 @@ package dev.persona.presentation;
 import dev.persona.application.persona.CreatePersonaUseCase;
 import dev.persona.application.persona.DeletePersonaUseCase;
 import dev.persona.application.persona.GetPersonaUseCase;
+import dev.persona.application.persona.ListPersonaUseCase;
 import dev.persona.application.persona.UpdatePersonaUseCase;
 import dev.persona.domain.dto.persona.request.CreatePersonaRequest;
 import dev.persona.domain.dto.persona.request.UpdatePersonaRequest;
@@ -24,7 +25,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
-@Path("/api")
+@Path("/api/persona")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @DeclareRoles("user")
@@ -34,6 +35,7 @@ public class PersonaController {
     private final GetPersonaUseCase getPersonaUseCase;
     private final UpdatePersonaUseCase updatePersonaUseCase;
     private final DeletePersonaUseCase deletePersonaUseCase;
+    private final ListPersonaUseCase listPersonaUseCase;
 
     @Inject
     JsonWebToken jwt;
@@ -41,17 +43,18 @@ public class PersonaController {
     @Inject
     public PersonaController(CreatePersonaUseCase createPersonaUseCase, 
     GetPersonaUseCase getPersonaUseCase, UpdatePersonaUseCase updatePersonaUseCase,
-    DeletePersonaUseCase deletePersonaUseCase) {
+    DeletePersonaUseCase deletePersonaUseCase, ListPersonaUseCase listPersonaUseCase) {
         this.createPersonaUseCase = createPersonaUseCase;
         this.getPersonaUseCase = getPersonaUseCase;
         this.updatePersonaUseCase = updatePersonaUseCase;
         this.deletePersonaUseCase = deletePersonaUseCase;
+        this.listPersonaUseCase = listPersonaUseCase;
     }
     
     @GET
     @Path("/{hash}")
     @WithSession
-    public Uni<Response> getWorkout(@PathParam("hash") final String hash) {
+    public Uni<Response> getPersona(@PathParam("hash") final String hash) {
         try {
             return getPersonaUseCase.execute(hash)
                     .map(response -> Response.status(Status.OK).entity(response).build())
@@ -120,11 +123,34 @@ public class PersonaController {
     @DELETE
     @Path("/delete/{hash}")
     @WithSession
-    public Uni<Response> deleteWorkout(@PathParam("hash") final String hash) {
+    public Uni<Response> deletePersona(@PathParam("hash") final String hash) {
         try {
             String userHash = jwt.getClaim("c_hash");
             return deletePersonaUseCase.execute(hash, userHash)
                     .map(response -> Response.status(Status.OK).entity(response).build())
+                    .log()
+                    .onFailure().transform(e -> {
+                        String message = e.getMessage();
+                        throw new ServiceException(
+                                message,
+                                Response.Status.BAD_REQUEST);
+                    });
+        } catch (Exception e) {
+            String message = e.getMessage();
+            throw new ServiceException(
+                    message,
+                    Response.Status.BAD_REQUEST);
+        }
+    }
+
+    @GET
+    @Path("/user/list")
+    @WithSession
+    public Uni<Response> listUserWorkouts() {
+        try {
+            String userHash = jwt.getClaim("c_hash");
+            return listPersonaUseCase.execute(userHash)
+                    .map(response -> Response.status(Status.ACCEPTED).entity(response).build())
                     .log()
                     .onFailure().transform(e -> {
                         String message = e.getMessage();

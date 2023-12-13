@@ -12,14 +12,14 @@ public class DeletePersonaUseCase {
         this.personaRepository = personaRepository;
     }
 
-    public Uni<Void> execute(final String hash, final String userHash) {
+    public Uni<Object> execute(final String hash, final String userHash) {
         return personaRepository.findByHash(hash)
         .onItem().ifNotNull()
         .transformToUni(persona -> {
             if (!userHash.equals(persona.getUserHash())) {
                 throw new IllegalArgumentException("Proibido");
             }
-            return persona.delete();
+            return personaRepository.deletePersona(persona);
         });
     }
 }

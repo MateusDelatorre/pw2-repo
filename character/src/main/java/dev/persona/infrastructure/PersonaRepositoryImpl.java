@@ -1,5 +1,7 @@
 package dev.persona.infrastructure;
 
+import java.util.List;
+
 import dev.persona.data.repository.PersonaRepository;
 import dev.persona.domain.models.PersonaEntity;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
@@ -19,4 +21,13 @@ public class PersonaRepositoryImpl implements PersonaRepository, PanacheReposito
         return find("hash", hash).firstResult();
     }
     
+    @Override
+    public Uni<List<PersonaEntity>> listUserPersona(String hash) {
+        return find("userHash", hash).list();
+    }
+
+    @Override
+    public Uni<Long> deletePersona(PersonaEntity persona) {
+        return delete("hash", persona.getHash());
+    }
 }

@@ -4,8 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter@Setter
-public class CreateMissionResponse {
+public class ListUserMissionsResponse {
     private String hash;
     private String nome;
-    private String description;
 }

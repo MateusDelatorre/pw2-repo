@@ -19,12 +19,14 @@ public class CreateMissionUseCase {
         MissionEntity mission = new MissionEntity();
         mission.setNome(request.getNome());
         mission.setUserHash(userHash);
+        mission.setDescription(request.getDescription());
 
         return missionRepository.persist(mission)
         .map(v -> {
             CreateMissionResponse response = new CreateMissionResponse();
             response.setHash(mission.getHash());
             response.setNome(mission.getNome());
+            response.setDescription(mission.getDescription());
             return response;
         });
     }
